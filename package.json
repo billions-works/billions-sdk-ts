@@ -1,0 +1,39 @@
+{
+  "name": "@billions-works/sdk-ts",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Billions public API",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/billions-works/billions-sdk-ts.git"
+  },
+  "homepage": "https://github.com/billions-works/billions-sdk-ts",
+  "bugs": {
+    "url": "https://github.com/billions-works/billions-sdk-ts/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "example:create": "tsx examples/create-invoice.ts",
+    "example:get": "tsx examples/get-invoice.ts",
+    "example:test-api": "tsx examples/local-api-test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
