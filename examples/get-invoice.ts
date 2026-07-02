@@ -16,6 +16,7 @@ async function main() {
 
   console.log('Invoice info:');
   console.log(JSON.stringify(invoice, null, 2));
+  console.log('Payment URL:', invoice.invoice_url);
 }
 
 main().catch((error) => {

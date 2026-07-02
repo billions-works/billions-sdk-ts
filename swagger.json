@@ -1,0 +1,519 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"CurrencyType": {
+				"type": "string",
+				"enum": [
+					"stablecoin",
+					"fiat",
+					"token"
+				]
+			},
+			"CurrencyInfo": {
+				"properties": {
+					"ticker": {
+						"type": "string"
+					},
+					"fullName": {
+						"type": "string"
+					},
+					"network": {
+						"type": "string"
+					},
+					"contractAddress": {
+						"type": "string",
+						"nullable": true
+					},
+					"type": {
+						"$ref": "#/components/schemas/CurrencyType"
+					},
+					"icon": {
+						"type": "string"
+					},
+					"iconDark": {
+						"type": "string"
+					},
+					"internalTicker": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"ticker",
+					"fullName",
+					"network",
+					"contractAddress",
+					"type",
+					"icon",
+					"iconDark",
+					"internalTicker"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PublicMerchantInfo": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"merchantName": {
+						"type": "string",
+						"nullable": true
+					},
+					"directorName": {
+						"type": "string",
+						"nullable": true
+					},
+					"website": {
+						"type": "string",
+						"nullable": true
+					},
+					"logo": {
+						"type": "string",
+						"nullable": true
+					},
+					"whitelabeling": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"email",
+					"merchantName",
+					"directorName",
+					"website",
+					"logo",
+					"whitelabeling"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InvoiceType": {
+				"type": "string",
+				"enum": [
+					"b2b",
+					"b2c"
+				]
+			},
+			"InvoiceStatus": {
+				"type": "string",
+				"enum": [
+					"pending",
+					"processing",
+					"completed",
+					"failed",
+					"expired",
+					"refunded",
+					"aml_check",
+					"aml_block"
+				]
+			},
+			"PublicCreatedInvoiceResponse": {
+				"properties": {
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"expires_at": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"invoice_url": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"type": {
+						"$ref": "#/components/schemas/InvoiceType"
+					},
+					"status": {
+						"$ref": "#/components/schemas/InvoiceStatus"
+					},
+					"merchant_id": {
+						"type": "string"
+					},
+					"settlement_currency": {
+						"type": "string",
+						"nullable": true
+					},
+					"currency": {
+						"type": "string",
+						"nullable": true
+					},
+					"convert_currency": {
+						"type": "string",
+						"nullable": true
+					},
+					"amount": {
+						"type": "string"
+					},
+					"merchant_fee": {
+						"type": "string"
+					},
+					"paid_amount": {
+						"type": "string"
+					},
+					"callback_url": {
+						"type": "string",
+						"nullable": true
+					},
+					"order_no": {
+						"type": "string",
+						"nullable": true
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"created_at",
+					"updated_at",
+					"expires_at",
+					"invoice_url",
+					"id",
+					"type",
+					"status",
+					"merchant_id",
+					"settlement_currency",
+					"currency",
+					"convert_currency",
+					"amount",
+					"merchant_fee",
+					"paid_amount",
+					"callback_url",
+					"order_no",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PublicCreateInvoiceBody": {
+				"properties": {
+					"currency": {
+						"type": "string"
+					},
+					"amount": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"type": {
+						"$ref": "#/components/schemas/InvoiceType"
+					},
+					"orderId": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"autoconvert": {
+						"type": "string"
+					},
+					"callbackUrl": {
+						"type": "string"
+					},
+					"expiresAt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"currency",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CalculatedInvoiceFeeResult": {
+				"properties": {
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"finalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"fee": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"amount",
+					"finalPrice",
+					"fee"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PublicEstimateInvoiceFeesBody": {
+				"properties": {
+					"currency": {
+						"type": "string"
+					},
+					"amount": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"type": {
+						"$ref": "#/components/schemas/InvoiceType"
+					},
+					"orderId": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"autoconvert": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"currency",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"ApiKeyAuth": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "x-api-key",
+				"description": "Merchant API key"
+			},
+			"BearerAuth": {
+				"type": "http",
+				"in": "header",
+				"scheme": "bearer",
+				"bearerFormat": "JWT",
+				"name": "Authorization",
+				"description": "JWT Token or Bearer Token"
+			}
+		}
+	},
+	"info": {
+		"title": "billions-backend",
+		"version": "1.0.0",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"paths": {
+		"/public/v1/version": {
+			"get": {
+				"operationId": "GetVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/public/v1/currencies": {
+			"get": {
+				"operationId": "Currencies",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/CurrencyInfo"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/public/v1/me": {
+			"get": {
+				"operationId": "Me",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PublicMerchantInfo"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/public/v1/invoices/create": {
+			"post": {
+				"operationId": "CreateInvoice",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PublicCreatedInvoiceResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PublicCreateInvoiceBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/v1/invoices/estimateFees": {
+			"post": {
+				"operationId": "EstimateFees",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CalculatedInvoiceFeeResult"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PublicEstimateInvoiceFeesBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/v1/invoices/{id}": {
+			"get": {
+				"operationId": "GetInvoice",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PublicCreatedInvoiceResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

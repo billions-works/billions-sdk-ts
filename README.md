@@ -19,6 +19,13 @@ const api = new BillionsApi({
 
 const version = await api.getVersion();
 const currencies = await api.getCurrencies();
+const invoice = await api.createInvoice({
+  currency: 'USDT',
+  amount: 100,
+  callbackUrl: 'https://example.com/webhook',
+});
+
+console.log(invoice.invoice_url);
 ```
 
 Default API host: `https://api.billions.works`
@@ -38,6 +45,12 @@ Get invoice:
 ```bash
 BILLIONS_API_KEY=your-api-key BILLIONS_INVOICE_ID=invoice-id npm run example:get
 ```
+
+Returned invoice objects include:
+
+- `invoice_url` — ready-to-use payment page URL
+- `expires_at` — payment expiration time or `null`
+- `status` — includes `pending`, `processing`, `completed`, `failed`, `expired`, `refunded`, `aml_check`, `aml_block`
 
 Local manual test against test environment:
 

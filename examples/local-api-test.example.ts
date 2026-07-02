@@ -23,10 +23,12 @@ async function main() {
 
   console.log('Created invoice:');
   console.log(JSON.stringify(invoice, null, 2));
+  console.log('Payment URL:', invoice.invoice_url);
 
   const invoiceInfo = await api.getInvoice(invoice.id);
   console.log('Fetched invoice:');
   console.log(JSON.stringify(invoiceInfo, null, 2));
+  console.log('Fetched payment URL:', invoiceInfo.invoice_url);
 }
 
 main().catch((error) => {

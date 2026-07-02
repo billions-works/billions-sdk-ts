@@ -1,6 +1,14 @@
 export type CurrencyType = 'stablecoin' | 'fiat' | 'token';
 export type InvoiceType = 'b2b' | 'b2c';
-export type InvoiceStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'aml_check' | 'aml_block';
+export type InvoiceStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'expired'
+  | 'refunded'
+  | 'aml_check'
+  | 'aml_block';
 
 export interface CurrencyInfo {
   ticker: string;
@@ -40,11 +48,14 @@ export interface EstimateInvoiceFeesResponse {
 
 export interface CreateInvoiceRequest extends EstimateInvoiceFeesRequest {
   callbackUrl?: string;
+  expiresAt?: string;
 }
 
 export interface InvoiceInfo {
   created_at: string;
   updated_at: string;
+  expires_at: string | null;
+  invoice_url: string;
   id: string;
   type: InvoiceType;
   status: InvoiceStatus;
