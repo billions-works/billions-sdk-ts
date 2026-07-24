@@ -141,6 +141,17 @@ export class BillionsApi {
     });
   }
 
+  async getInvoicesByOrder(orderNo: string): Promise<InvoiceInfo[]> {
+    const normalizedOrderNo = String(orderNo || '').trim();
+    if (!normalizedOrderNo) {
+      throw new Error('orderNo is required');
+    }
+
+    return this.request<InvoiceInfo[]>(`/invoices/byOrder/${encodeURIComponent(normalizedOrderNo)}`, {
+      method: 'GET',
+    });
+  }
+
   async verifyInvoicePaid(
     invoiceIdOrCallback: string | VerifyInvoicePaidCallbackData,
     callbackData?: VerifyInvoicePaidCallbackData,

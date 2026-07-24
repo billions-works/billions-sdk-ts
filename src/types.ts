@@ -4,6 +4,7 @@ export type InvoiceStatus =
   | 'pending'
   | 'processing'
   | 'completed'
+  | 'refund_processing'
   | 'failed'
   | 'expired'
   | 'refunded'
@@ -35,7 +36,7 @@ export interface EstimateInvoiceFeesRequest {
   currency: string;
   amount: number | string;
   type?: InvoiceType;
-  orderId?: string;
+  order_no?: string;
   description?: string;
   autoconvert?: string;
 }
@@ -44,9 +45,12 @@ export interface EstimateInvoiceFeesResponse {
   amount: number;
   finalPrice: number;
   fee: number;
+  summaryFee?: number;
+  merchantReceiveAmount: number;
 }
 
 export interface CreateInvoiceRequest extends EstimateInvoiceFeesRequest {
+  idempotencyKey?: string;
   callbackUrl?: string;
   expiresAt?: string;
 }
@@ -64,6 +68,8 @@ export interface InvoiceInfo {
   currency: string | null;
   convert_currency: string | null;
   amount: string;
+  final_amount: string;
+  merchant_receive_amount: string;
   merchant_fee: string;
   paid_amount: string;
   callback_url: string | null;

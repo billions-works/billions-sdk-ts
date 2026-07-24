@@ -13,7 +13,8 @@ async function main() {
     currency: 'USDT',
     amount: 100,
     type: 'b2b',
-    orderId: `example-${Date.now()}`,
+    order_no: `example-${Date.now()}`,
+    idempotencyKey: `create-example-${Date.now()}`,
     description: 'Example invoice from billions-sdk-ts',
     callbackUrl: 'https://example.com/webhook',
   });

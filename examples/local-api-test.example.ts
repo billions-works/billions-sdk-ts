@@ -1,6 +1,8 @@
 import { BillionsApi } from '../src/index.js';
 
 async function main() {
+  const orderNo = `sdk-test-${Date.now()}`;
+  const idempotencyKey = `sdk-test-create-${Date.now()}`;
   const api = new BillionsApi({
     apiKey: 'PUT_YOUR_TEST_API_KEY_HERE',
     baseUrl: 'https://api-test.billions.works',
@@ -16,7 +18,8 @@ async function main() {
     currency: 'USDT',
     amount: 10,
     type: 'b2b',
-    orderId: `sdk-test-${Date.now()}`,
+    order_no: orderNo,
+    idempotencyKey,
     description: 'SDK local api-test check',
     callbackUrl: 'https://example.com/webhook',
   });
@@ -29,6 +32,10 @@ async function main() {
   console.log('Fetched invoice:');
   console.log(JSON.stringify(invoiceInfo, null, 2));
   console.log('Fetched payment URL:', invoiceInfo.invoice_url);
+
+  const invoicesByOrder = await api.getInvoicesByOrder(orderNo);
+  console.log('Invoices by order_no:');
+  console.log(JSON.stringify(invoicesByOrder, null, 2));
 }
 
 main().catch((error) => {
