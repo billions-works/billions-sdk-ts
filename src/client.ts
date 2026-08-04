@@ -7,6 +7,7 @@ import type {
   EstimateInvoiceFeesRequest,
   EstimateInvoiceFeesResponse,
   InvoiceInfo,
+  InvoiceWebhookPayload,
   MerchantInfo,
   VerifyInvoicePaidCallbackData,
 } from './types.js';
@@ -34,6 +35,19 @@ function normalizeDecimalString(value: string | number): string {
   const normalized = fractionPart ? `${integerPart}.${fractionPart}` : integerPart;
 
   return negative && normalized !== '0' ? `-${normalized}` : normalized;
+}
+
+function getWebhookData(
+  callback: VerifyInvoicePaidCallbackData | InvoiceWebhookPayload,
+): VerifyInvoicePaidCallbackData {
+  return 'data' in callback ? callback.data : callback;
+}
+
+function getWebhookInvoiceId(
+  callback: VerifyInvoicePaidCallbackData | InvoiceWebhookPayload,
+): string {
+  const data = getWebhookData(callback);
+  return String(data.invoice_id || data.id || '').trim();
 }
 
 export class BillionsApi {
@@ -153,23 +167,24 @@ export class BillionsApi {
   }
 
   async verifyInvoicePaid(
-    invoiceIdOrCallback: string | VerifyInvoicePaidCallbackData,
-    callbackData?: VerifyInvoicePaidCallbackData,
+    invoiceIdOrCallback: string | VerifyInvoicePaidCallbackData | InvoiceWebhookPayload,
+    callbackData?: VerifyInvoicePaidCallbackData | InvoiceWebhookPayload,
   ): Promise<InvoiceInfo> {
     const invoiceId = typeof invoiceIdOrCallback === 'string'
       ? String(invoiceIdOrCallback).trim()
-      : String(invoiceIdOrCallback?.id || '').trim();
+      : getWebhookInvoiceId(invoiceIdOrCallback);
 
-    const callback = typeof invoiceIdOrCallback === 'string'
+    const rawCallback = typeof invoiceIdOrCallback === 'string'
       ? callbackData
       : invoiceIdOrCallback;
 
     if (!invoiceId) {
       throw new Error('invoice id is required');
     }
-    if (!callback) {
+    if (!rawCallback) {
       throw new Error('callback data is required');
     }
+    const callback = getWebhookData(rawCallback);
 
     const invoice = await this.getInvoice(invoiceId);
 
@@ -186,5 +201,15 @@ export class BillionsApi {
     }
 
     return invoice;
+  }
+
+  async getInvoiceFromWebhook(
+    webhook: VerifyInvoicePaidCallbackData | InvoiceWebhookPayload,
+  ): Promise<InvoiceInfo> {
+    const invoiceId = getWebhookInvoiceId(webhook);
+    if (!invoiceId) {
+      throw new Error('invoice id is required');
+    }
+    return this.getInvoice(invoiceId);
   }
 }

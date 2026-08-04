@@ -79,8 +79,37 @@ export interface InvoiceInfo {
 
 export interface VerifyInvoicePaidCallbackData {
   id?: string;
+  invoice_id?: string;
   status: string;
   paid_amount: string | number;
+}
+
+export type InvoiceWebhookEvent = 'invoice.paid' | 'invoice.status_changed';
+
+export interface InvoiceWebhookData {
+  invoice_id: string;
+  external_invoice_id: string | null;
+  order_no: string | null;
+  previous_status: InvoiceStatus;
+  status: InvoiceStatus;
+  amount: string;
+  final_amount: string;
+  paid_amount: string;
+  merchant_fee: string;
+  merchant_receive_amount: string;
+  currency: string | null;
+  settlement_currency: string | null;
+  payment_source: string | null;
+  payment_address: string | null;
+  updated_at: string;
+}
+
+export interface InvoiceWebhookPayload extends Partial<InvoiceWebhookData> {
+  event: InvoiceWebhookEvent;
+  event_timestamp: string;
+  attempt: number;
+  previous_attempt_timestamp: string | null;
+  data: InvoiceWebhookData;
 }
 
 export interface BillionsApiOptions {

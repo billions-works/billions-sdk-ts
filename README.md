@@ -65,6 +65,24 @@ Public API updates supported by this SDK:
 - invoice lookups by `order_no` with `getInvoicesByOrder(orderNo)`
 - request naming aligned with public API `order_no` field
 
+## Webhooks
+
+Current webhooks use an envelope with `event`, retry timestamps and canonical
+invoice fields in `data`. Top-level invoice fields are transitional duplicates.
+
+```ts
+const invoice = await api.getInvoiceFromWebhook(webhook);
+
+if (webhook.event === 'invoice.paid') {
+  const verified = await api.verifyInvoicePaid(webhook);
+}
+```
+
+`getInvoiceFromWebhook()` treats the webhook as a wake-up signal and retrieves the
+authoritative invoice for any status. `verifyInvoicePaid()` accepts both the new
+envelope and legacy `{ id, status, paid_amount }` callbacks, requires the API invoice
+to be `completed`, and compares status and paid amount.
+
 Local manual test against test environment:
 
 ```bash
