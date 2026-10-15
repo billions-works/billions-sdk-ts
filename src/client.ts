@@ -3,6 +3,7 @@ import { BillionsApiError, CallbackVerificationError, InvoiceNotPaidError } from
 import type {
   BillionsApiOptions,
   CreateInvoiceRequest,
+  CountryInfo,
   CurrencyInfo,
   EstimateInvoiceFeesRequest,
   EstimateInvoiceFeesResponse,
@@ -124,6 +125,10 @@ export class BillionsApi {
 
   async getCurrencies(): Promise<CurrencyInfo[]> {
     return this.request<CurrencyInfo[]>('/currencies', { method: 'GET' });
+  }
+
+  async getCountries(): Promise<CountryInfo[]> {
+    return this.request<CountryInfo[]>('/countries', { method: 'GET' });
   }
 
   async getMerchantInfo(): Promise<MerchantInfo> {

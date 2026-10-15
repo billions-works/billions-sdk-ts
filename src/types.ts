@@ -22,6 +22,11 @@ export interface CurrencyInfo {
   internalTicker: string;
 }
 
+export interface CountryInfo {
+  code: string;
+  name: string;
+}
+
 export interface MerchantInfo {
   id: string;
   email: string;
@@ -69,6 +74,7 @@ export interface InvoiceInfo {
   convert_currency: string | null;
   amount: string;
   final_amount: string;
+  network_and_other_fees: string;
   merchant_receive_amount: string;
   merchant_fee: string;
   paid_amount: string;
@@ -96,6 +102,7 @@ export interface InvoiceWebhookData {
   final_amount: string;
   paid_amount: string;
   merchant_fee: string;
+  network_and_other_fees: string;
   merchant_receive_amount: string;
   currency: string | null;
   settlement_currency: string | null;

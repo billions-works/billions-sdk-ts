@@ -19,6 +19,7 @@ const api = new BillionsApi({
 
 const version = await api.getVersion();
 const currencies = await api.getCurrencies();
+const countries = await api.getCountries();
 const invoice = await api.createInvoice({
   currency: 'USDT',
   amount: 100,
@@ -57,6 +58,7 @@ Returned invoice objects include:
 - `invoice_url` - ready-to-use payment page URL
 - `order_no` - merchant order reference returned by create/get/byOrder endpoints
 - `expires_at` - payment expiration time or `null`
+- `network_and_other_fees` - network and processor fees included in the invoice calculation
 - `status` - includes `pending`, `processing`, `completed`, `refund_processing`, `failed`, `expired`, `refunded`, `aml_check`, `aml_block`
 
 Public API updates supported by this SDK:
@@ -64,6 +66,7 @@ Public API updates supported by this SDK:
 - create invoice idempotency via `idempotencyKey`
 - invoice lookups by `order_no` with `getInvoicesByOrder(orderNo)`
 - request naming aligned with public API `order_no` field
+- country directory via `getCountries()`
 
 ## Webhooks
 
