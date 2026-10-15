@@ -60,6 +60,59 @@ export interface CreateInvoiceRequest extends EstimateInvoiceFeesRequest {
   expiresAt?: string;
 }
 
+export interface SignedRequestOptions {
+  requestId?: string;
+  timestamp?: string | number;
+}
+
+export interface CreateWithdrawalRequest {
+  currency: string;
+  amount: number | string;
+  withdrawalMethodId: number;
+}
+
+export interface CreateCryptoRefundRequest {
+  invoiceId: string;
+  reason?: string;
+  address?: string;
+  withdrawToSameAddress?: boolean;
+}
+
+export interface CreateFiatRefundRequest {
+  invoiceId: string;
+  reason?: string;
+}
+
+export interface WithdrawalRequestInfo {
+  id: string;
+  currency: string;
+  amount: string;
+  withdrawal_method_id: number;
+  status: string;
+  payout_processor_status: string | null;
+  payout_processor_tx_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RefundRequestInfo {
+  id: string;
+  invoice_id: string;
+  type: string;
+  currency: string;
+  amount: string;
+  to_address: string | null;
+  withdraw_to_same_address: boolean;
+  status: string;
+  payout_processor_status: string | null;
+  payout_processor_tx_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WithdrawalResponse { request: WithdrawalRequestInfo }
+export interface RefundResponse { request: RefundRequestInfo }
+
 export interface InvoiceInfo {
   created_at: string;
   updated_at: string;
@@ -121,6 +174,7 @@ export interface InvoiceWebhookPayload extends Partial<InvoiceWebhookData> {
 
 export interface BillionsApiOptions {
   apiKey: string;
+  secretKey?: string;
   webhookSecret?: string;
   baseUrl?: string;
   version?: string;

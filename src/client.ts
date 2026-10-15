@@ -4,6 +4,9 @@ import { canonicalizeJson } from './json-canonicalization.js';
 import type {
   BillionsApiOptions,
   CreateInvoiceRequest,
+  CreateCryptoRefundRequest,
+  CreateFiatRefundRequest,
+  CreateWithdrawalRequest,
   CountryInfo,
   CurrencyInfo,
   EstimateInvoiceFeesRequest,
@@ -11,7 +14,10 @@ import type {
   InvoiceInfo,
   InvoiceWebhookPayload,
   MerchantInfo,
+  RefundResponse,
+  SignedRequestOptions,
   VerifyInvoicePaidCallbackData,
+  WithdrawalResponse,
 } from './types.js';
 
 function normalizeBaseUrl(value?: string): string {
@@ -55,6 +61,7 @@ function getWebhookInvoiceId(
 export class BillionsApi {
   public readonly apiKey: string;
   public readonly webhookSecret?: string;
+  public readonly secretKey?: string;
   public readonly baseUrl: string;
   public readonly version: string;
   private readonly fetchFn: typeof fetch;
@@ -63,8 +70,14 @@ export class BillionsApi {
     if (!options?.apiKey || !String(options.apiKey).trim()) {
       throw new Error('apiKey is required');
     }
+    if (options.secretKey !== undefined && options.secretKey.length === 0) {
+      throw new Error('secretKey must not be empty');
+    }
     if (options.webhookSecret !== undefined && options.webhookSecret.length === 0) {
       throw new Error('webhookSecret must not be empty');
+    }
+    if (options.secretKey && options.webhookSecret && options.secretKey !== options.webhookSecret) {
+      throw new Error('secretKey and webhookSecret must match when both are provided');
     }
 
     if (typeof globalThis.fetch !== 'function' && !options.fetchFn) {
@@ -72,7 +85,8 @@ export class BillionsApi {
     }
 
     this.apiKey = String(options.apiKey).trim();
-    this.webhookSecret = options.webhookSecret;
+    this.secretKey = options.secretKey || options.webhookSecret;
+    this.webhookSecret = this.secretKey;
     this.baseUrl = normalizeBaseUrl(options.baseUrl);
     this.version = String(options.version || BILLIONS_PUBLIC_API_VERSION).trim() || BILLIONS_PUBLIC_API_VERSION;
     this.fetchFn = options.fetchFn || globalThis.fetch.bind(globalThis);
@@ -153,6 +167,27 @@ export class BillionsApi {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+  }
+
+  async createWithdrawal(
+    payload: CreateWithdrawalRequest,
+    options?: SignedRequestOptions,
+  ): Promise<WithdrawalResponse> {
+    return this.signedMutation('/withdrawals/create', payload, options);
+  }
+
+  async refundCrypto(
+    payload: CreateCryptoRefundRequest,
+    options?: SignedRequestOptions,
+  ): Promise<RefundResponse> {
+    return this.signedMutation('/refunds/refundCrypto', payload, options);
+  }
+
+  async refundFiat(
+    payload: CreateFiatRefundRequest,
+    options?: SignedRequestOptions,
+  ): Promise<RefundResponse> {
+    return this.signedMutation('/refunds/refundFiat', payload, options);
   }
 
   async getInvoice(invoiceId: string): Promise<InvoiceInfo> {
@@ -260,5 +295,39 @@ export class BillionsApi {
     const bodyBytes: Uint8Array<ArrayBuffer> = encoder.encode(canonicalizeJson(parsedBody));
 
     return cryptoApi.verify('HMAC', key, signatureBytes, bodyBytes);
+  }
+
+  private async signedMutation<T>(
+    path: string,
+    payload: unknown,
+    options?: SignedRequestOptions,
+  ): Promise<T> {
+    if (!this.secretKey) {
+      throw new Error('secretKey is required for signed operations');
+    }
+    const cryptoApi = globalThis.crypto;
+    if (!cryptoApi?.subtle || typeof cryptoApi.randomUUID !== 'function') {
+      throw new Error('Web Crypto API is required for signed operations');
+    }
+    const timestamp = String(options?.timestamp ?? Math.floor(Date.now() / 1000));
+    const requestId = String(options?.requestId || cryptoApi.randomUUID()).toLowerCase();
+    const fullPath = `${this.publicApiBasePath}${path}`;
+    const message = `POST\n${fullPath}\n${timestamp}\n${requestId}\n${canonicalizeJson(payload)}`;
+    const encoder = new TextEncoder();
+    const key = await cryptoApi.subtle.importKey(
+      'raw', encoder.encode(this.secretKey), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+    );
+    const digest = new Uint8Array(await cryptoApi.subtle.sign('HMAC', key, encoder.encode(message)));
+    const signature = Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+    return this.request<T>(path, {
+      method: 'POST',
+      headers: {
+        'x-billions-timestamp': timestamp,
+        'x-billions-request-id': requestId,
+        'x-billions-request-signature': `v1=${signature}`,
+      },
+      body: JSON.stringify(payload),
+    });
   }
 }

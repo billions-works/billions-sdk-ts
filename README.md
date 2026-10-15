@@ -15,7 +15,7 @@ import { BillionsApi } from '@billions-works/sdk-ts';
 
 const api = new BillionsApi({
   apiKey: 'your-api-key',
-  webhookSecret: 'your-webhook-secret',
+  secretKey: 'your-api-secret-key',
 });
 
 const version = await api.getVersion();
@@ -27,6 +27,12 @@ const invoice = await api.createInvoice({
   order_no: 'ORDER-1001',
   idempotencyKey: 'create-order-1001',
   callbackUrl: 'https://example.com/webhook',
+});
+
+const withdrawal = await api.createWithdrawal({
+  currency: 'EUR',
+  amount: '70',
+  withdrawalMethodId: 123,
 });
 
 console.log(invoice.invoice_url);
@@ -68,6 +74,12 @@ Public API updates supported by this SDK:
 - invoice lookups by `order_no` with `getInvoicesByOrder(orderNo)`
 - request naming aligned with public API `order_no` field
 - country directory via `getCountries()`
+- signed withdrawals and crypto/fiat refunds via `createWithdrawal()`, `refundCrypto()`, and `refundFiat()`
+
+Signed money operations require `secretKey` in the constructor. The SDK generates
+the timestamp, UUID request ID, RFC 8785 canonical body, and `v1` request signature.
+Pass `requestId` in the optional second argument when retrying a request whose
+response was lost; reuse the same ID and body to preserve idempotency.
 
 ## Webhooks
 

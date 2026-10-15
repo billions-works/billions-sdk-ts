@@ -343,6 +343,181 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PublicWithdrawalRequest": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "string"
+					},
+					"withdrawal_method_id": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "string"
+					},
+					"payout_processor_status": {
+						"type": "string",
+						"nullable": true
+					},
+					"payout_processor_tx_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"currency",
+					"amount",
+					"withdrawal_method_id",
+					"status",
+					"payout_processor_status",
+					"payout_processor_tx_id",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateMerchantWithdrawalInput": {
+				"properties": {
+					"currency": {
+						"type": "string"
+					},
+					"amount": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"withdrawalMethodId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"currency",
+					"amount",
+					"withdrawalMethodId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PublicRefundRequest": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"invoice_id": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "string"
+					},
+					"to_address": {
+						"type": "string",
+						"nullable": true
+					},
+					"withdraw_to_same_address": {
+						"type": "boolean"
+					},
+					"status": {
+						"type": "string"
+					},
+					"payout_processor_status": {
+						"type": "string",
+						"nullable": true
+					},
+					"payout_processor_tx_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"invoice_id",
+					"type",
+					"currency",
+					"amount",
+					"to_address",
+					"withdraw_to_same_address",
+					"status",
+					"payout_processor_status",
+					"payout_processor_tx_id",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateMerchantCryptoRefundInput": {
+				"properties": {
+					"invoiceId": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"withdrawToSameAddress": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"invoiceId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateMerchantFiatRefundInput": {
+				"properties": {
+					"invoiceId": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"invoiceId"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -612,6 +787,138 @@
 						}
 					}
 				]
+			}
+		},
+		"/public/v1/withdrawals/create": {
+			"post": {
+				"operationId": "CreateWithdrawal",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"request": {
+											"$ref": "#/components/schemas/PublicWithdrawalRequest"
+										}
+									},
+									"required": [
+										"request"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMerchantWithdrawalInput"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/v1/refunds/refundCrypto": {
+			"post": {
+				"operationId": "RefundCrypto",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"request": {
+											"$ref": "#/components/schemas/PublicRefundRequest"
+										}
+									},
+									"required": [
+										"request"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMerchantCryptoRefundInput"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/public/v1/refunds/refundFiat": {
+			"post": {
+				"operationId": "RefundFiat",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"request": {
+											"$ref": "#/components/schemas/PublicRefundRequest"
+										}
+									},
+									"required": [
+										"request"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Public API"
+				],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateMerchantFiatRefundInput"
+							}
+						}
+					}
+				}
 			}
 		}
 	},
