@@ -1,5 +1,6 @@
 import { BILLIONS_DEFAULT_BASE_URL, BILLIONS_PUBLIC_API_VERSION } from './constants.js';
 import { BillionsApiError, CallbackVerificationError, InvoiceNotPaidError } from './errors.js';
+import { canonicalizeJson } from './json-canonicalization.js';
 import type {
   BillionsApiOptions,
   CreateInvoiceRequest,
@@ -223,12 +224,12 @@ export class BillionsApi {
     return this.getInvoice(invoiceId);
   }
 
-  async verifyWebhookSignature(signature: string, body: string | Uint8Array): Promise<boolean> {
+  async verifyWebhookSignature(signature: string, body: unknown): Promise<boolean> {
     if (this.webhookSecret === undefined) {
       throw new Error('webhookSecret is required to verify webhook signatures');
     }
 
-    const normalizedSignature = String(signature || '').trim().replace(/^sha256=/i, '');
+    const normalizedSignature = String(signature || '').trim().replace(/^jcs-sha256=/i, '');
     if (!/^[a-f0-9]{64}$/i.test(normalizedSignature)) {
       return false;
     }
@@ -250,9 +251,13 @@ export class BillionsApi {
       normalizedSignature.match(/.{2}/g) || [],
       (byte) => Number.parseInt(byte, 16),
     );
-    const bodyBytes: Uint8Array<ArrayBuffer> = Uint8Array.from(
-      typeof body === 'string' ? encoder.encode(body) : body,
-    );
+    let parsedBody = body;
+    if (typeof body === 'string') {
+      parsedBody = JSON.parse(body);
+    } else if (body instanceof Uint8Array) {
+      parsedBody = JSON.parse(new TextDecoder().decode(body));
+    }
+    const bodyBytes: Uint8Array<ArrayBuffer> = encoder.encode(canonicalizeJson(parsedBody));
 
     return cryptoApi.verify('HMAC', key, signatureBytes, bodyBytes);
   }

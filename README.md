@@ -74,16 +74,16 @@ Public API updates supported by this SDK:
 Current webhooks use an envelope with `event`, retry timestamps and canonical
 invoice fields in `data`. Top-level invoice fields are transitional duplicates.
 
-Verify the signature against the exact raw request body before parsing JSON:
+Verify the signature using the received JSON body, either raw or already parsed:
 
 ```ts
 const valid = await api.verifyWebhookSignature(signatureHeader, rawBody);
 ```
 
-The method verifies an HMAC-SHA256 hex signature and accepts either the plain
-64-character hex value or `sha256=<hex>`. It throws if `webhookSecret` was not
-configured. Do not stringify a parsed object: whitespace and key order are part
-of the signed body.
+The method canonicalizes the parsed JSON according to RFC 8785 (JCS), then verifies
+its HMAC-SHA256 signature. It accepts either the plain 64-character hex value or
+`jcs-sha256=<hex>`. Whitespace, JSON property order, and equivalent escaping do not
+affect verification. The secret is the original API `secretKey`, used as UTF-8 text.
 
 ```ts
 const invoice = await api.getInvoiceFromWebhook(webhook);
