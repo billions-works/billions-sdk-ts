@@ -15,6 +15,7 @@ import { BillionsApi } from '@billions-works/sdk-ts';
 
 const api = new BillionsApi({
   apiKey: 'your-api-key',
+  webhookSecret: 'your-webhook-secret',
 });
 
 const version = await api.getVersion();
@@ -72,6 +73,17 @@ Public API updates supported by this SDK:
 
 Current webhooks use an envelope with `event`, retry timestamps and canonical
 invoice fields in `data`. Top-level invoice fields are transitional duplicates.
+
+Verify the signature against the exact raw request body before parsing JSON:
+
+```ts
+const valid = await api.verifyWebhookSignature(signatureHeader, rawBody);
+```
+
+The method verifies an HMAC-SHA256 hex signature and accepts either the plain
+64-character hex value or `sha256=<hex>`. It throws if `webhookSecret` was not
+configured. Do not stringify a parsed object: whitespace and key order are part
+of the signed body.
 
 ```ts
 const invoice = await api.getInvoiceFromWebhook(webhook);

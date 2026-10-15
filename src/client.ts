@@ -53,6 +53,7 @@ function getWebhookInvoiceId(
 
 export class BillionsApi {
   public readonly apiKey: string;
+  public readonly webhookSecret?: string;
   public readonly baseUrl: string;
   public readonly version: string;
   private readonly fetchFn: typeof fetch;
@@ -61,12 +62,16 @@ export class BillionsApi {
     if (!options?.apiKey || !String(options.apiKey).trim()) {
       throw new Error('apiKey is required');
     }
+    if (options.webhookSecret !== undefined && options.webhookSecret.length === 0) {
+      throw new Error('webhookSecret must not be empty');
+    }
 
     if (typeof globalThis.fetch !== 'function' && !options.fetchFn) {
       throw new Error('fetch implementation is required');
     }
 
     this.apiKey = String(options.apiKey).trim();
+    this.webhookSecret = options.webhookSecret;
     this.baseUrl = normalizeBaseUrl(options.baseUrl);
     this.version = String(options.version || BILLIONS_PUBLIC_API_VERSION).trim() || BILLIONS_PUBLIC_API_VERSION;
     this.fetchFn = options.fetchFn || globalThis.fetch.bind(globalThis);
@@ -216,5 +221,39 @@ export class BillionsApi {
       throw new Error('invoice id is required');
     }
     return this.getInvoice(invoiceId);
+  }
+
+  async verifyWebhookSignature(signature: string, body: string | Uint8Array): Promise<boolean> {
+    if (this.webhookSecret === undefined) {
+      throw new Error('webhookSecret is required to verify webhook signatures');
+    }
+
+    const normalizedSignature = String(signature || '').trim().replace(/^sha256=/i, '');
+    if (!/^[a-f0-9]{64}$/i.test(normalizedSignature)) {
+      return false;
+    }
+
+    const cryptoApi = globalThis.crypto?.subtle;
+    if (!cryptoApi) {
+      throw new Error('Web Crypto API is required to verify webhook signatures');
+    }
+
+    const encoder = new TextEncoder();
+    const key = await cryptoApi.importKey(
+      'raw',
+      encoder.encode(this.webhookSecret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    );
+    const signatureBytes: Uint8Array<ArrayBuffer> = Uint8Array.from(
+      normalizedSignature.match(/.{2}/g) || [],
+      (byte) => Number.parseInt(byte, 16),
+    );
+    const bodyBytes: Uint8Array<ArrayBuffer> = Uint8Array.from(
+      typeof body === 'string' ? encoder.encode(body) : body,
+    );
+
+    return cryptoApi.verify('HMAC', key, signatureBytes, bodyBytes);
   }
 }

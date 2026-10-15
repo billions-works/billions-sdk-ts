@@ -121,6 +121,7 @@ export interface InvoiceWebhookPayload extends Partial<InvoiceWebhookData> {
 
 export interface BillionsApiOptions {
   apiKey: string;
+  webhookSecret?: string;
   baseUrl?: string;
   version?: string;
   fetchFn?: typeof fetch;
